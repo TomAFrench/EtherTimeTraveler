@@ -1,91 +1,92 @@
+const { expect } = require('chai');
+const { MockProvider } = require('ethereum-waffle');
 const helper = require('../utils.js')
 
 const SECONDS_IN_DAY = 86400
+const provider = new MockProvider();
 
-contract('Test Utils', async () =>  {
+describe('Test Utils', async () =>  {
     it("Test advanceBlock", async() => {
         //grab block before advancing blocks 
-        const blockBefore = await web3.eth.getBlock('latest')
+        const blockBefore = await provider.getBlock('latest')
         const blockNumberBefore = blockBefore.number
 
-        await helper.advanceBlock()
+        await helper.advanceBlock(provider)
         
         //grab block after advancing blocks 
-        const blockAfter = await web3.eth.getBlock('latest')
+        const blockAfter = await provider.getBlock('latest')
         const blockNumberAfter = blockAfter.number
-        assert.equal(blockNumberBefore + 1, blockNumberAfter, "New block was not mined")
+        expect(blockNumberBefore + 1, "New block was not mined").to.equal(blockNumberAfter)
     })
 
     it("Test advanceTime", async() => {
-        const blockBefore = await web3.eth.getBlock('latest')
+        const blockBefore = await provider.getBlock('latest')
         const blockNumberBefore = blockBefore.number
         const timeBefore = blockBefore.timestamp
 
-        await helper.advanceTime(SECONDS_IN_DAY);
+        await helper.advanceTime(provider, SECONDS_IN_DAY);
         //time doesn't update unless block is mined
-        await helper.advanceBlock()
+        await helper.advanceBlock(provider)
         
-        const blockAfter = await web3.eth.getBlock('latest')
+        const blockAfter = await provider.getBlock('latest')
         const blockNumberAfter = blockAfter.number
-        assert.equal(blockNumberBefore + 1, blockNumberAfter, "New block was not mined")
+        expect(blockNumberBefore + 1, "New block was not mined").to.equal(blockNumberAfter)
 
         const timeAfter = blockAfter.timestamp
-        assert.isBelow(timeBefore, timeAfter, "Time was not advanced")
+        expect(timeBefore, "Time was not advanced").to.be.below(timeAfter)
     })
 
     it("Test advanceBlockAndSetTime", async() => {
-        const blockBefore = await web3.eth.getBlock('latest')
+        const blockBefore = await provider.getBlock('latest')
         const blockNumberBefore = blockBefore.number
         const timeBefore = blockBefore.timestamp
         
         // move time backwards
-        await helper.advanceBlockAndSetTime(timeBefore - SECONDS_IN_DAY);
+        await helper.advanceBlockAndSetTime(provider, timeBefore - SECONDS_IN_DAY);
         
-        const blockAfter = await web3.eth.getBlock('latest')
+        const blockAfter = await provider.getBlock('latest')
         const blockNumberAfter = blockAfter.number
         const timeAfter = blockAfter.timestamp
-        assert.isBelow(timeAfter, timeBefore, "Time was not set back")
-        assert.isBelow(blockNumberBefore, blockNumberAfter, "Block was not advanced")
+        expect(timeAfter, "Time was not set back").to.be.below(timeBefore)
+        expect(blockNumberBefore, "Block was not advanced").to.be.below(blockNumberAfter)
     })
 
     it("Test advanceTimeAndBlock", async() => {
-        const blockBefore = await web3.eth.getBlock('latest') 
+        const blockBefore = await provider.getBlock('latest') 
         const blockNumberBefore = blockBefore.number
         const timeBefore = blockBefore.timestamp
 
-        await helper.advanceTimeAndBlock(SECONDS_IN_DAY);
+        await helper.advanceTimeAndBlock(provider, SECONDS_IN_DAY);
         
-        const blockAfter = await web3.eth.getBlock('latest')
+        const blockAfter = await provider.getBlock('latest')
         const blockNumberAfter = blockAfter.number
         const timeAfter = blockAfter.timestamp
-        assert.isBelow(timeBefore, timeAfter, "Time and Block were not advanced")
-        assert.isBelow(blockNumberBefore, blockNumberAfter, "Block was not advanced")
+        expect(timeBefore, "Time and Block were not advanced").to.be.below(timeAfter)
+        expect(blockNumberBefore, "Block was not advanced").to.be.below(blockNumberAfter)
     })
 
     it("Test takeSnapshot", async() => {
-        const snapshot = await helper.takeSnapshot()
-        const snapshotId = snapshot.result
-        assert.exists(snapshotId, "Unable to produce snapshot")
+        const snapshotId = await helper.takeSnapshot(provider)
+        expect(snapshotId, "Unable to produce snapshot").to.exist
     })
 
     it("Test revertToSnapshot", async() => {
         // grab block before advancing time
-        const snapshot = await helper.takeSnapshot()
-        const snapshotId = snapshot.result
-        const blockBefore = await web3.eth.getBlock('latest')
+        const snapshotId = await helper.takeSnapshot(provider)
+        const blockBefore = await provider.getBlock('latest')
         const timeBefore = blockBefore.timestamp
 
         // advance time forward
-        await helper.advanceTimeAndBlock(SECONDS_IN_DAY)
-        const blockAfter = await web3.eth.getBlock('latest')
+        await helper.advanceTimeAndBlock(provider, SECONDS_IN_DAY)
+        const blockAfter = await provider.getBlock('latest')
         const timeAfter = blockAfter.timestamp
-        assert.isBelow(timeBefore, timeAfter, "Time did not advance")
+        expect(timeBefore, "Time was not advanced").to.be.below(timeAfter)
 
-        await helper.revertToSnapshot(snapshotId)
+        await helper.revertToSnapshot(provider, snapshotId)
 
         //grab block after reverting time
-        const blockReverted = await web3.eth.getBlock('latest')
+        const blockReverted = await provider.getBlock('latest')
         const timeReverted = blockReverted.timestamp
-        assert.equal(timeBefore, timeReverted, "Time and block have been reverted")
+        expect(timeBefore, "Time and block were not reverted").to.equal(timeReverted)
     })
 });

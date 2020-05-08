@@ -1,31 +1,31 @@
 {
-  "name": "ganache-time-traveler",
-  "version": "1.0.14",
-  "description": "A ganache utility that simplifies writing time dependent or stateless tests on a local Ethereum blockchain.",
+  "name": "ether-time-traveler",
+  "version": "1.0.0",
+  "description": "A utility that simplifies writing time dependent or stateless tests on a local Ethereum blockchain.",
   "main": "utils.js",
   "scripts": {
-    "test": "truffle test",
-    "ganache": "ganache-cli -d"
+    "test": "mocha test/**/*.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ejwessel/GanacheTimeTraveler.git"
+    "url": "git+https://github.com/TomAFrench/EtherTimeTraveler"
   },
-  "author": "ejwessel",
+  "author": "Tom French",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/ejwessel/GanacheTimeTraveler/issues"
+    "url": "https://github.com/TomAFrench/EtherTimeTraveler"
   },
-  "homepage": "https://github.com/ejwessel/GanacheTimeTraveler#readme",
+  "homepage": "https://github.com/TomAFrench/EtherTimeTraveler#readme",
   "devDependencies": {
-    "ganache-cli": "^6.5.0",
-    "truffle": "5.0.28"
+    "chai": "^4.2.0",
+    "ethereum-waffle": "^2.5.0",
+    "mocha": "^7.1.2"
   },
   "keywords": [
-      "ethereum",
-      "solidity",
-      "testing",
-      "truffle",
-      "ganache"
+    "ethereum",
+    "solidity",
+    "testing",
+    "ethers",
+    "ganache"
   ]
 }

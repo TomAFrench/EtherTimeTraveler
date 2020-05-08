@@ -1,92 +1,33 @@
-/* global web3,  */ // ignore those keywords when linting
 /*
 * Use of code from https://medium.com/edgefund/time-travelling-truffle-tests-f581c1964687
 * Utility functions to advance blocktime and mine blocks artificially for EVM
 */
-advanceTime = (time) => {
-  return new Promise((resolve, reject) => {
-    web3.currentProvider.send({
-      jsonrpc: '2.0',
-      method: 'evm_increaseTime',
-      params: [time],
-      id: new Date().getTime()
-    }, (err, result) => {
-      if (err) { return reject(err) }
-      return resolve(result)
-    })
-  })
+
+const advanceTime = (provider, time) => {
+  return provider.send('evm_increaseTime', [time])
 }
 
-advanceBlock = () => {
-  return new Promise((resolve, reject) => {
-    web3.currentProvider.send({
-      jsonrpc: '2.0',
-      method: 'evm_mine',
-      id: new Date().getTime()
-    }, (err, result) => {
-      if (err) { return reject(err) }
-      return resolve(result)
-    })
-  })
+const advanceBlock = (provider) => {
+    return provider.send('evm_mine', [])
 }
 
-advanceBlockAndSetTime = (time) => {
-    return new Promise((resolve, reject) => {
-        web3.currentProvider.send({
-            jsonrpc: '2.0',
-            method: 'evm_mine',
-            params: [time],
-            id: new Date().getTime()
-        }, (err, result) => {
-            if (err) { return reject(err) }
-            return resolve(result)
-        })
-    })
+const advanceBlockAndSetTime = (provider, time) => {
+    return provider.send('evm_mine', [time])
 }
 
-advanceTimeAndBlock = async (time) => {
-    //capture current time
-    let block = await web3.eth.getBlock('latest')
-    let forwardTime = block['timestamp'] + time
-
-    return new Promise((resolve, reject) => {
-      web3.currentProvider.send({
-        jsonrpc: '2.0',
-        method: 'evm_mine',
-        params: [forwardTime],
-        id: new Date().getTime()
-    }, (err, result) => {
-        if (err) { return reject(err) }
-        return resolve(result)
-    })
-  })
+const advanceTimeAndBlock = async (provider, time) => {
+    // capture current time
+    const block = await provider.getBlock('latest')
+    const forwardTime = block.timestamp + time
+    return provider.send('evm_mine', [forwardTime])
 }
 
-takeSnapshot = () => {
-  return new Promise((resolve, reject) => {
-    web3.currentProvider.send({
-      jsonrpc: '2.0',
-      method: 'evm_snapshot',
-      id: new Date().getTime()
-    }, (err, snapshotId) => {
-      if (err) { return reject(err) }
-      return resolve(snapshotId)
-    })
-  })
+const takeSnapshot = (provider) => {
+    return provider.send('evm_snapshot')
 }
 
-revertToSnapshot = (id) => {
-  return new Promise((resolve, reject) => {
-    web3.currentProvider.send({
-      jsonrpc: '2.0',
-      method: 'evm_revert',
-      params: [id],
-      id: new Date().getTime()
-    }, (err, result) => {
-      if (err) { return reject(err) }
-      return resolve(result)
-    })
-  })
+const revertToSnapshot = (provider, id) => {
+    return provider.send('evm_revert', [id])
 }
 
 module.exports = {
